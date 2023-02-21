@@ -1,14 +1,15 @@
 #!/usr/bin/zsh
  
 __update_command() {
+  tput sc
   zle .$WIDGET
   local key="${BUFFER: -1}"
   __CURRENT_INPUT="${__CURRENT_INPUT}${key}"
-  echo $__CURRENT_INPUT
+  echo "\n$__CURRENT_INPUT"
+  tput rc
 }
 
 __prepare_for_next(){
-  echo "${__CURRENT_INPUT}"
   __CURRENT_INPUT=""
 }
 
