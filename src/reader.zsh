@@ -9,6 +9,16 @@ __update_command() {
   tput rc
 }
 
+function __remove_char() {
+  tput sc
+  zle backward-delete-char
+  __CURRENT_INPUT="${__CURRENT_INPUT%?}"
+  echo "\n$__CURRENT_INPUT\033[K"
+  tput rc
+}
+zle -N __remove_in_copy __remove_char
+bindkey "^?" __remove_in_copy
+
 __prepare_for_next(){
   __CURRENT_INPUT=""
 }
