@@ -7,6 +7,11 @@ import (
 )
 
 func main() {
+	// get_commands() # this process moved to a shell script
+	fmt.Println(os.Args[1])
+}
+
+func get_commands() {
 	// Get the user's PATH environment variable
 	path := os.Getenv("PATH")
 	paths := strings.Split(path, ":")
