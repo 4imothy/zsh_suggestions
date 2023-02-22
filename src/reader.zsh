@@ -5,7 +5,8 @@ __update_command() {
   local key="${KEYS[-1]}"
   __CURRENT_INPUT="${BUFFER}"
   tput sc
-  echo "\n$__CURRENT_INPUT\033[K" # ascii to erase to end of line
+  # echo "\n$__CURRENT_INPUT\033[K" # ascii to erase to end of line
+  printf "\n%s$__CURRENT_INPUT\033[K"  # print contents on next line and erase to end of line
   tput rc
 }
 
