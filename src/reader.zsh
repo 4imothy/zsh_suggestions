@@ -4,8 +4,6 @@ __update_command() {
   zle .$WIDGET
   local key="${KEYS[-1]}"
   __CURRENT_INPUT="${BUFFER}"
-  # echo "\n$__CURRENT_INPUT\033[K" # ascii to erase to end of line
-  # printf "\n%s$__CURRENT_INPUT\033[K"  # print contents on next line and erase to end of line
   tput sc
   __find_matches
   tput rc
@@ -36,7 +34,7 @@ __find_matches(){
         longest_string=""
         index=0
         for string in "${matches[@]}"; do
-          if [[ "$longest_string" == "" || "${#string}" -gt "${#longest_string}" ]]; then
+          if [[ "${#string}" -gt "${#longest_string}" ]]; then
             longest_string="$string"
             index=$index+1
           fi
