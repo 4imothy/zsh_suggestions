@@ -33,19 +33,24 @@ __find_matches(){
         # Find the longest string in the array
         longest_string=""
         index=0
+        long_ind=0
         for string in "${matches[@]}"; do
+          index=$((index+1))
           if [[ "${#string}" -gt "${#longest_string}" ]]; then
             longest_string="$string"
-            index=$index+1
+            long_ind=($index)
           fi
         done
         if [[ "${#ex}" -lt "${#longest_string}" ]]; then
-              matches[$index]=$ex # replace the longest string 
+              # echo "replacing $longest_string with $ex\n"
+              # echo "at suposed index of replace: $matches[$long_ind], index is $long_ind\n" 
+              matches[$long_ind]=$ex # replace the longest string 
         fi
       fi
     fi
   done 
   echo "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces
+
 }
 
 
