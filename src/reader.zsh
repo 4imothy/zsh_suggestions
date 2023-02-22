@@ -27,6 +27,10 @@ __find_matches(){
   for ex in "${executables[@]}"; do
     if [[ "$ex" == "$__CURRENT_INPUT"* ]]; then
       # If the current input partially matches an item in the vector, print a message
+      # echo $ex
+      # if [[ $ex == "source" ]]; then
+      #   echo "found $ex"
+      # fi
       if [[ "${#matches}" -lt 5 ]]; then # if the length of matches is less than 5 add
         matches+=$ex
       else
@@ -42,8 +46,6 @@ __find_matches(){
           fi
         done
         if [[ "${#ex}" -lt "${#longest_string}" ]]; then
-              # echo "replacing $longest_string with $ex\n"
-              # echo "at suposed index of replace: $matches[$long_ind], index is $long_ind\n" 
               matches[$long_ind]=$ex # replace the longest string 
         fi
       fi
@@ -93,3 +95,15 @@ for directory in ${(s/:/)${PATH}}; do
     fi
   done 
 done  
+# add all the builtins, cd, source,...
+for cmd in ${(k)builtins}; do 
+  executables+=$cmd
+done 
+# loop through all the aliases and add them to the array
+for alias in ${(k)aliases}; do
+    executables+=("$alias")
+done 
+# loop through all the functions and add them to the array
+for func in ${(k)functions}; do
+    executables+=("$func")
+done 
