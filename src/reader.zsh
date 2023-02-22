@@ -34,27 +34,26 @@ __find_matches(){
       else
         # Find the longest string in the array
         longest_string=""
+        index=0
         for string in "${matches[@]}"; do
           if [[ "$longest_string" == "" || "${#string}" -gt "${#longest_string}" ]]; then
             longest_string="$string"
+            index=$index+1
           fi
         done
-          # If the new string is shorter than the longest string, replace it
         if [[ "${#ex}" -lt "${#longest_string}" ]]; then
-          index=0
-          for i in $(seq 0 $((${#matches[@]} - 1))); do # locate the index of the longest string
-            if [[ "${matches[$i]}" == "$longest_string" ]]; then
-              matches[$i]=$ex # replace the longest string
-              break
-            fi
-          done
-        fi 
+              matches[$index]=$ex # replace the longest string 
+        fi
       fi
     fi
   done 
   echo "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces
 }
 
+
+__CURRENT_INPUT=""
+
+zle -N self-insert __update_command  
 zle -N __remove_in_copy __remove_char # create a new zle widget to change default function of the delete
 bindkey "^?" __remove_in_copy
 
@@ -63,10 +62,6 @@ __prepare_for_next(){
 }
 
 # Only do these things the first time this file is sourced
-
-__CURRENT_INPUT=""
-
-zle -N self-insert __update_command  
 
 if [[ ! "$precmd_functions" == *__prepare_for_next* ]]; then
     precmd_functions+=(__prepare_for_next)
