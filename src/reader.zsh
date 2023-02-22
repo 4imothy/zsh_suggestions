@@ -4,21 +4,58 @@ __update_command() {
   zle .$WIDGET
   local key="${KEYS[-1]}"
   __CURRENT_INPUT="${BUFFER}"
-  tput sc
   # echo "\n$__CURRENT_INPUT\033[K" # ascii to erase to end of line
-  printf "\n%s$__CURRENT_INPUT\033[K"  # print contents on next line and erase to end of line
-  tput rc
-}
-
-function __remove_char() {
-  zle backward-delete-char
-  __CURRENT_INPUT="${__CURRENT_INPUT%?}" # remove the last character
+  # printf "\n%s$__CURRENT_INPUT\033[K"  # print contents on next line and erase to end of line
   tput sc
-  echo "\n$__CURRENT_INPUT\033[K" # ascii to erase to end of line
+  __find_matches
   tput rc
 }
 
-zle -N __remove_in_copy __remove_char
+__remove_char() {
+  zle backward-delete-char
+  __CURRENT_INPUT="${BUFFER}" # remove the last character
+  tput sc
+  __find_matches
+  tput rc
+}
+
+__find_matches(){
+  # if there are no typed words, then clear the output and return
+  if [[ ${#__CURRENT_INPUT} -eq 0 ]]; then
+    echo "\n\033[K"
+    return
+  fi 
+  matches=()
+  for ex in "${executables[@]}"; do
+    if [[ "$ex" == "$__CURRENT_INPUT"* ]]; then
+      # If the current input partially matches an item in the vector, print a message
+      if [[ "${#matches}" -lt 5 ]]; then # if the length of matches is less than 5 add
+        matches+=$ex
+      else
+        # Find the longest string in the array
+        longest_string=""
+        for string in "${matches[@]}"; do
+          if [[ "$longest_string" == "" || "${#string}" -gt "${#longest_string}" ]]; then
+            longest_string="$string"
+          fi
+        done
+          # If the new string is shorter than the longest string, replace it
+        if [[ "${#ex}" -lt "${#longest_string}" ]]; then
+          index=0
+          for i in $(seq 0 $((${#matches[@]} - 1))); do # locate the index of the longest string
+            if [[ "${matches[$i]}" == "$longest_string" ]]; then
+              matches[$i]=$ex # replace the longest string
+              break
+            fi
+          done
+        fi 
+      fi
+    fi
+  done 
+  echo "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces
+}
+
+zle -N __remove_in_copy __remove_char # create a new zle widget to change default function of the delete
 bindkey "^?" __remove_in_copy
 
 __prepare_for_next(){
@@ -52,10 +89,9 @@ for directory in ${(s/:/)${PATH}}; do
   for file in "${directory}"/*(N); do
 
     # Check if the file is executable
-    if [[ -x "${file}" ]]; then
-
-      # Print the full path to the executable
-      executables+=("${file:t}")
-    fi 
+    if [[ -x "${file}" ]]; then 
+      # add only the executable name
+      executables+=("${file:t}") 
+    fi
   done 
 done  
