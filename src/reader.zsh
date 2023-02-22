@@ -10,8 +10,8 @@ __update_command() {
 }
 
 __remove_char() {
-  zle backward-delete-char
-  __CURRENT_INPUT="${BUFFER}" # remove the last character
+  zle backward-delete-char # remove the last character
+  __CURRENT_INPUT="${BUFFER}"
   tput sc
   __find_matches
   tput rc
@@ -51,50 +51,23 @@ __find_matches(){
       fi
     fi
   done 
-  echo "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces
-
-}
-
+  echo "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces 
+} 
 
 __CURRENT_INPUT=""
 
 zle -N self-insert __update_command  
-zle -N __remove_in_copy __remove_char # create a new zle widget to change default function of the delete
+zle -N __remove_in_copy __remove_char # change the action of delete key to deleting most recent and updating __CURRENT_INPUT
 bindkey "^?" __remove_in_copy
-
-__prepare_for_next(){
-  __CURRENT_INPUT=""
-}
-
-# Only do these things the first time this file is sourced
-
-if [[ ! "$precmd_functions" == *__prepare_for_next* ]]; then
-    precmd_functions+=(__prepare_for_next)
-fi 
-
-# get all the executable commands
  
-# path=(${(s/:/)${PATH}})
-# local executables=()
-
-# # Loop through each directory in the path
-# for directory in "${path[@]}"; do
+# below only happen when file is sourced
 
 local executables=()
 
-# Loop through each directory in the path
-for directory in ${(s/:/)${PATH}}; do
-
-  # Loop through each file in the directory
-  for file in "${directory}"/*(N); do
-
-    # Check if the file is executable
-    if [[ -x "${file}" ]]; then 
-      # add only the executable name
-      executables+=("${file:t}") 
-    fi
-  done 
-done  
+# loop through $commands instead of path
+for com in $commands; do
+  executables+=("${com:t}")
+done
 # add all the builtins, cd, source,...
 for cmd in ${(k)builtins}; do 
   executables+=$cmd
@@ -107,3 +80,17 @@ done
 for func in ${(k)functions}; do
     executables+=("$func")
 done 
+
+# Loop through each directory in the path
+# for directory in ${(s/:/)${PATH}}; do
+
+#   # Loop through each file in the directory
+#   for file in "${directory}"/*(N); do
+
+#     # Check if the file is executable
+#     if [[ -x "${file}" ]]; then 
+#       # add only the executable name
+#       executables+=("${file:t}") 
+#     fi
+#   done 
+# done  
