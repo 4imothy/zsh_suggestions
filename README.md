@@ -9,4 +9,4 @@ ToDo:
 * [x] Create go script to get the path info 
 
 Issues:
-* [ ] When reading at bottom line and printing below tput rc puts the cursor on the bottom need it to go one up
+* [x] When reading at bottom line and printing below tput rc puts the cursor on the bottom need it to go one up
