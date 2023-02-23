@@ -2,31 +2,38 @@
  
 __update_command() {
   zle .$WIDGET
-  local key="${KEYS[-1]}"
   __current_input="${BUFFER}"
-  tput sc
   # echo ${${(s: :)CURSOR_POS}[1]} ${${(s: :)CURSOR_POS}[2]}
   # tput sc
-  __set_fut_pos
-  __show_matches
+  __get_cur_pos
+  __find_matches
+  __set_fut_pos  
+  __print_matches
   tput cup $__fut_row $__fut_col
 }
 
 __remove_char() {
   zle backward-delete-char # remove the last character
   __current_input="${BUFFER}"
+  __get_cur_pos
+  __find_matches
   __set_fut_pos
-  __show_matches
+  __print_matches
   tput cup $__fut_row $__fut_col
 }
 
-function __show_matches(){
+function __find_matches(){
+  __prev_length="${#matches}"
+  matches=()
   # if there are no typed words, then clear the output and return
   if [[ ${#__current_input} -eq 0 ]]; then
-    echo -n "\n\033[K"
+    while [ $__prev_length -ge 1 ] 
+    do
+      echo -n "\n\033[K"
+      ((__prev_length--))
+    done
     return
   fi 
-  matches=()
   for ex in "${executables[@]}"; do
     if [[ "$ex" == "$__current_input"* ]]; then
       # if [[ $ex == "source" ]]; then
@@ -52,24 +59,42 @@ function __show_matches(){
       fi
     fi
   done 
-  echo -n "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces 
+  # echo -n "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces 
 } 
- 
 
-function __set_fut_pos(){
+function __print_matches(){
+  for ((i=1; i<=${#matches[@]}; i+=1)); do 
+    echo -n "\n$matches[$i]\033[K" # print out matches
+  done 
+  # if the matches have less then the previous number in matches then print out blank lines
+  remaining=$((__prev_length - i)) 
+  while [ $remaining -ge 0 ] 
+  do
+    echo -n "\n\033[K"
+    ((remaining--))
+  done
+}
+  
+function __set_fut_pos(){ 
+  space=$(($(tput lines) - __fut_row))
+  if [[ ${#matches[@]} -ge $space ]]; then # if length is greater than space
+    ((__fut_row-=$((${#matches} - space ))))  # move up length - space
+    ((__fut_row--))
+  fi
+  # if [[ __fut_row -ge (($(tput lines) - ${#matches[@]}))  ]]; then
+  #     # subtract an extra when at the bottom the line moves up
+  #     __fut_row=$((__fut_row - ${#matches[@]})) 
+  #   fi
+} 
+
+function __get_cur_pos(){
   echo -ne "\033[6n"
   read -t 1 -s -d 'R' line < /dev/tty
   line="${line##*\[}"
-  __fut_row=$((${line%%;*})) # extract the row number
-  __fut_col=$((${line##*;}-1)) # extract the column number
-
-  if [[ __fut_row -eq $(tput lines) ]]; then
-  ((__fut_row-=1)) # subtract an extra when at the bottom the line moves up
-  fi
-
-  ((__fut_row-=1))
+  __fut_row=$((${line%%;*}-1)) # extract the row number
+  __fut_col=$((${line##*;}-1)) # extract the column number 
 }
- 
+
 __current_input=""
 __fut_row=""
 __fut_col=""
