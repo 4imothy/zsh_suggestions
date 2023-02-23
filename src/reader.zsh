@@ -20,6 +20,7 @@ function __match_input(){
     tput cup $__fut_row $__fut_col
     return
   fi 
+  __match__hist
   __match_execs
   __set_fut_pos
   __print_matches
@@ -34,12 +35,45 @@ function __clear_if_no_input(){
     done
 }
 
+function __match__hist(){ 
+  for h in "${__hist[@]}"; do
+    if [[ "$h" == "$__current_input"* ]]; then
+      if [[ "${#__matches}" -lt __MAX_LENGTH ]]; then # if the length of matches is less than 5 add
+        __matches+=$h
+      else
+        # Find the longest string in the array
+        longest_string=""
+        index=0
+        long_ind=0
+        for string in "${__matches[@]}"; do
+          index=$((index+1))
+          if [[ "${#string}" -gt "${#longest_string}" ]]; then
+            longest_string="$string"
+            long_ind=($index)
+          fi
+        done
+        if [[ "${#h}" -lt "${#longest_string}" ]]; then
+              __matches[$long_ind]=$h # replace the longest string 
+        fi
+      fi
+    fi
+  done 
+}
+
 function __match_execs(){
   # if there are no typed words, then clear the output and return
   for ex in "${__executables[@]}"; do
     if [[ "$ex" == "$__current_input"* ]]; then
-      # if [[ $ex == "source" ]]; then
-      #   echo "found $ex"
+        # dont allow duplicats between history and commands
+      #   is_in=false
+      #   for s in "${__matches[@]}"; do
+      #     if [[ $ex == $s ]]; then
+      #       is_in=true
+      #       break
+      #     fi
+      #   done
+      # if [[ $is_in == true ]]; then
+      #     break
       # fi
       if [[ "${#__matches}" -lt __MAX_LENGTH ]]; then # if the length of matches is less than 5 add
         __matches+=$ex
@@ -111,7 +145,11 @@ __fut_col=""
 __executables=()
 # __idx_selected=0
 zmodload zsh/mapfile
+#__hist=("${(f@)mapfile[test.txt]}") 
 __hist=("${(f@)mapfile[$HISTFILE]}") 
+typeset -U __hist # remove duplicates
+__matches=()
+typeset -U __matches
 
 zle -N self-insert __keypress 
 zle -N __remove_in_copy __delete # change the action of delete key to deleting most recent and updating __current_input
