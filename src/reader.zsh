@@ -1,19 +1,16 @@
 #!/usr/bin/zsh
  
-__update_command() {
+function __keypress() {
   zle .$WIDGET
-  __current_input="${BUFFER}"
-  # echo ${${(s: :)CURSOR_POS}[1]} ${${(s: :)CURSOR_POS}[2]}
-  # tput sc
-  __get_cur_pos
-  __find_matches
-  __set_fut_pos  
-  __print_matches
-  tput cup $__fut_row $__fut_col
+  __match_input
 }
 
-__remove_char() {
+function __delete() {
   zle backward-delete-char # remove the last character
+  __match_input
+}
+
+function __match_input(){
   __current_input="${BUFFER}"
   __get_cur_pos
   __find_matches
@@ -59,7 +56,10 @@ function __find_matches(){
       fi
     fi
   done 
-  # echo -n "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces  
+
+  # short so shortest is first
+  __matches=("${(@f)$(printf '%s\n' "${__matches[@]}" | awk '{ print length, $0 }' | sort -n | cut -d ' ' -f 2-)}") 
+
   unset string
   unset index
   unset long_ind
@@ -98,14 +98,15 @@ function __get_cur_pos(){
   unset line
 }
 
+# below only happen when file is sourced at beginning of session
+__MAX_LENGTH=5 # change this to allow for more suggestions
 __current_input=""
 __fut_row=""
 __fut_col=""
-__MAX_LENGTH=5
 __executables=()
 
-zle -N self-insert __update_command  
-zle -N __remove_in_copy __remove_char # change the action of delete key to deleting most recent and updating __current_input
+zle -N self-insert __keypress 
+zle -N __remove_in_copy __delete # change the action of delete key to deleting most recent and updating __current_input
 bindkey "^?" __remove_in_copy
 
 # loop through $commands instead of path
