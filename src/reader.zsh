@@ -12,25 +12,30 @@ function __delete() {
 
 function __match_input(){
   __current_input="${BUFFER}"
-  __get_cur_pos
-  __find_matches
+  __prev_length="${#__matches}"
+  __matches=()
+    __get_cur_pos
+  if [[ ${#__current_input} -eq 0 ]]; then
+    __clear_if_no_input
+    tput cup $__fut_row $__fut_col
+    return
+  fi 
+  __match_execs
   __set_fut_pos
   __print_matches
   tput cup $__fut_row $__fut_col
 }
 
-function __find_matches(){
-  __prev_length="${#__matches}"
-  __matches=()
-  # if there are no typed words, then clear the output and return
-  if [[ ${#__current_input} -eq 0 ]]; then
-    while [ $__prev_length -ge 1 ] 
+function __clear_if_no_input(){
+  while [ $__prev_length -ge 1 ] 
     do
       echo -n "\n\033[K"
       ((__prev_length--))
     done
-    return
-  fi 
+}
+
+function __match_execs(){
+  # if there are no typed words, then clear the output and return
   for ex in "${__executables[@]}"; do
     if [[ "$ex" == "$__current_input"* ]]; then
       # if [[ $ex == "source" ]]; then
@@ -104,12 +109,15 @@ __current_input=""
 __fut_row=""
 __fut_col=""
 __executables=()
+# __idx_selected=0
+zmodload zsh/mapfile
+__hist=("${(f@)mapfile[$HISTFILE]}") 
 
 zle -N self-insert __keypress 
 zle -N __remove_in_copy __delete # change the action of delete key to deleting most recent and updating __current_input
 bindkey "^?" __remove_in_copy
 
-# loop through $commands instead of path
+# loop through $commands
 for com in $commands; do
   __executables+=("${com:t}")
 done
