@@ -5,22 +5,27 @@ __update_command() {
   local key="${KEYS[-1]}"
   __CURRENT_INPUT="${BUFFER}"
   tput sc
+  # echo ${${(s: :)CURSOR_POS}[1]} ${${(s: :)CURSOR_POS}[2]}
+  # tput sc
+  __set_fut_pos
   __find_matches
-  tput rc
+  # save cursor move it up the length of matches
+  # tput rc
+  tput cup $__fut_row $__fut_col
 }
 
 __remove_char() {
   zle backward-delete-char # remove the last character
   __CURRENT_INPUT="${BUFFER}"
-  tput sc
+  __set_fut_pos
   __find_matches
-  tput rc
+  tput cup $__fut_row $__fut_col
 }
 
 __find_matches(){
   # if there are no typed words, then clear the output and return
   if [[ ${#__CURRENT_INPUT} -eq 0 ]]; then
-    echo "\n\033[K"
+    echo -n "\n\033[K"
     return
   fi 
   matches=()
@@ -51,10 +56,35 @@ __find_matches(){
       fi
     fi
   done 
-  echo "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces 
+  echo -n "\n$matches\033[K" # print out at most the shortest 5 matches, clearing the rest of spaces 
 } 
+ 
+__set_fut_pos(){
+  echo -ne "\033[6n"
+  read -t 1 -s -d 'R' line < /dev/tty
+  line="${line##*\[}"
+  __fut_row=$((${line%%;*})) # extract the row number
+  __fut_col=$((${line##*;}-1)) # extract the column number
+
+  if [[ __fut_row -eq $(tput lines) ]]; then
+  ((__fut_row-=1)) # subtract an extra when at the bottom the line moves up
+  fi
+
+  ((__fut_row-=1))
+}
+
+# __set_fut_pos(){
+#   echo -ne "\033[6n"
+#   read -t 1 -s -d 'R' line < /dev/tty
+#   line="${line##*\[}"
+#   __fut_row="${line%%;*}" # extract the row number
+#   __fut_col="${line##*;}"; # extract the column number
+#   ((__fut_row -= 1, __fut_col -= 1))
+# }
 
 __CURRENT_INPUT=""
+__fut_row=""
+__fut_col=""
 
 zle -N self-insert __update_command  
 zle -N __remove_in_copy __remove_char # change the action of delete key to deleting most recent and updating __CURRENT_INPUT
