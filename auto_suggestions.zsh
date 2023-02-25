@@ -1,5 +1,19 @@
 #!/bin/zsh
+
 __MAX_LENGTH=5 # change this to allow for more/less suggestions
+__SELECTED_FG="\033[30m"
+__SELECTED_BG="\033[46m"
+__MATCHED_FG="\033[30m"
+__DEFAULT_FG="\033[34m" # change this to the color you want your typed text to be
+ 
+function __set_fut_pos(){ 
+  space=$(($(tput lines) - __fut_row))
+  if [[ ${#__matches[@]} -ge $space ]]; then # if length is greater than space
+    ((__fut_row-=$((${#__matches} - space ))))  # move up length - space
+    ((__fut_row--))
+  fi
+  unset space
+}
  
 function __keypress() {
   zle .$WIDGET
@@ -105,13 +119,13 @@ function __match_execs(){
   unset long_ind
   unset longest_string
 } 
-
+  
 function __print_matches(){
   for ((i=1; i<=${#__matches[@]}; i+=1)); do 
     if [[ $i == $__selected_index ]]; then
-      echo -n "\n\033[45m$__matches[$i]\033[49m\033[K" # print out the selected match with purple background
+      echo -n "\n$__SELECTED_BG$__SELECTED_FG$__matches[$i]\033[39m\033[49m\033[K" # print out the selected match with colored background
     else
-      echo -n "\n$__matches[$i]\033[K" # print out matches
+      echo -n "$__MATCHED_FG\n$__matches[$i]\033[K" # print out matches
     fi
   done 
   # if the matches have less then the previous number in matches then print out blank lines
@@ -122,16 +136,8 @@ function __print_matches(){
     ((remaining--))
   done
   unset remaining
+  echo -n "$__DEFAULT_FG"
 }
-  
-function __set_fut_pos(){ 
-  space=$(($(tput lines) - __fut_row))
-  if [[ ${#__matches[@]} -ge $space ]]; then # if length is greater than space
-    ((__fut_row-=$((${#__matches} - space ))))  # move up length - space
-    ((__fut_row--))
-  fi
-  unset space
-} 
 
 function __get_cur_pos(){
   echo -ne "\033[6n"
