@@ -1,6 +1,19 @@
+#### ZSH-AutoSuggestions
+
 This is a repository containing the src for zsh-completions.
 
-ToDo:
+**How to Use**
+- Copy the *auto_suggestions.zsh* file and source it.
+- Begin typing and prompts will appear below the prompt
+- Use *ctrl+n* to select the next and *ctrl+p* to select the previous
+
+**Customizations**
+- In editing *auto_suggestions.zsh*
+- Change *__MAX_LENGTH* to change the number of the maximum number of matched items to print
+- Change *__SELECTED_BG* and *__SELECTED_GF* to change the styling of the currently selected item
+- Change *__MATCHED_FG* to change the styling of the non-selected matched items
+
+**ToDo:**
 * [ ] Implement path expansions for editors, cd, ...
 * [x] Implement selections, ctrl+n: next, ctrl+p: prev
 * [x] Read .zsh_history
@@ -9,5 +22,5 @@ ToDo:
 * [x] Implement reading each character typed
 * [x] Create go script to get the path info 
 
-Issues:
+**Issues:**
 * [x] When reading at bottom line and printing below tput rc puts the cursor on the bottom because that was prev position. It needs to move up the length of matches - space to bottom
