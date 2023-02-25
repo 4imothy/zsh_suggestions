@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/bin/zsh
 __MAX_LENGTH=5 # change this to allow for more/less suggestions
  
 function __keypress() {
