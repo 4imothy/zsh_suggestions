@@ -12,6 +12,7 @@ This is a repository containing the src for zsh-completions.
 - Change *__MAX_LENGTH* to change the number of the maximum number of matched items to print
 - Change *__SELECTED_BG* and *__SELECTED_GF* to change the styling of the currently selected item
 - Change *__MATCHED_FG* to change the styling of the non-selected matched items
+
 **Demo Video**
 
 
