@@ -26,7 +26,7 @@ https://user-images.githubusercontent.com/40186632/221368741-5c9897eb-148b-4e5c-
 * [x] Save the current input in a variable
 * [x] Implement comparing against the current input with possible commands
 * [x] Implement reading each character typed
-* [x] Create go script to get the path info 
+* [x] Get all executables, aliases, functions, builtins
 
 **Issues:**
 * [x] When reading at bottom line and printing below tput rc puts the cursor on the bottom because that was prev position. It needs to move up the length of matches - space to bottom
