@@ -4,7 +4,7 @@ This is a repository containing the src for zsh-completions.
 
 **How to Use**
 - Copy the *auto_suggestions.zsh* file and source it. *curl -O https://raw.githubusercontent.com/4tlc/zsh_suggestions/main/auto_suggestions.zsh*
-- Or to source it once without copying to machine run *source <(curl -sSL https://raw.githubusercontent.com/4tlc/zsh_suggestions/main/auto_suggestions.zsh)*
+- Or to source it once without copying to machine run *source <(curl  https://raw.githubusercontent.com/4tlc/zsh_suggestions/main/auto_suggestions.zsh)*
 - Begin typing and prompts will appear below the prompt
 - Use *ctrl+n* to select the next and *ctrl+p* to select the previous
 
