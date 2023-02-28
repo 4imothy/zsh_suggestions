@@ -35,8 +35,7 @@ function __match_input(){
     tput cup $__fut_row $__fut_col
     return
   fi 
-  __match__hist
-  __match_execs
+  __match_possibles
   __set_fut_pos
   __print_matches
   tput cup $__fut_row $__fut_col
@@ -50,46 +49,11 @@ function __clear_if_no_input(){
     done
 }
 
-function __match__hist(){ 
-  for h in "${__hist[@]}"; do
-    if [[ "$h" == "$__current_input"* ]]; then
-      if [[ "${#__matches}" -lt __MAX_LENGTH ]]; then # if the length of matches is less than 5 add
-        __matches+=$h
-      else
-        # Find the longest string in the array
-        longest_string=""
-        index=0
-        long_ind=0
-        for string in "${__matches[@]}"; do
-          index=$((index+1))
-          if [[ "${#string}" -gt "${#longest_string}" ]]; then
-            longest_string="$string"
-            long_ind=($index)
-          fi
-        done
-        if [[ "${#h}" -lt "${#longest_string}" ]]; then
-              __matches[$long_ind]=$h # replace the longest string 
-        fi
-      fi
-    fi
-  done 
-}
-
-function __match_execs(){
+      
+function __match_possibles(){
   # if there are no typed words, then clear the output and return
-  for ex in "${__executables[@]}"; do
+  for ex in "${__possibles[@]}"; do
     if [[ "$ex" == "$__current_input"* ]]; then
-        # dont allow duplicats between history and commands
-      #   is_in=false
-      #   for s in "${__matches[@]}"; do
-      #     if [[ $ex == $s ]]; then
-      #       is_in=true
-      #       break
-      #     fi
-      #   done
-      # if [[ $is_in == true ]]; then
-      #     break
-      # fi
       if [[ "${#__matches}" -lt __MAX_LENGTH ]]; then # if the length of matches is less than 5 add
         __matches+=$ex
       else
@@ -195,12 +159,11 @@ __selected_index=0
 __current_input=""
 __fut_row=""
 __fut_col=""
-__executables=()
 # __idx_selected=0
 zmodload zsh/mapfile
 #__hist=("${(f@)mapfile[test.txt]}") 
-__hist=("${(f@)mapfile[$HISTFILE]}") 
-typeset -U __hist # remove duplicates
+__possibles=("${(f@)mapfile[$HISTFILE]}") 
+typeset -U __possibles # remove duplicates
 __matches=()
 typeset -U __matches # make it a set
 
@@ -214,17 +177,17 @@ bindkey "^N" __next
 
 # loop through $commands
 for com in $commands; do
-  __executables+=("${com:t}")
+  __possibles+=("${com:t}")
 done
 # add all the builtins, cd, source,...
 for cmd in ${(k)builtins}; do 
-  __executables+=$cmd
+  __possibles+=$cmd
 done 
 # loop through all the aliases and add them to the array
 for alias in ${(k)aliases}; do
-  __executables+=("$alias")
+  __possibles+=("$alias")
 done 
 # loop through all the functions and add them to the array
 for func in ${(k)functions}; do
-  __executables+=("$func")
+  __possibles+=("$func")
 done 
