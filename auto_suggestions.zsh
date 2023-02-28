@@ -163,7 +163,6 @@ __fut_col=""
 zmodload zsh/mapfile
 #__hist=("${(f@)mapfile[test.txt]}") 
 __possibles=("${(f@)mapfile[$HISTFILE]}") 
-typeset -U __possibles # remove duplicates
 __matches=()
 typeset -U __matches # make it a set
 
@@ -175,19 +174,27 @@ bindkey "^?" __remove_in_copy
 bindkey "^P" __prev
 bindkey "^N" __next
 
-# loop through $commands
-for com in $commands; do
-  __possibles+=("${com:t}")
-done
+# add the following to possibles to match against
+__possibles+=("${(k)commands[@]}")
+__possibles+=("${(k)builtins[@]}")
+__possibles+=("${(k)aliases[@]}")
+__possibles+=("${(k)functions[@]}")
+
+typeset -U __possibles
+# remove duplicates # loop through $commands
+# for com in $commands; do
+#   # take the last in the path, the name
+#   __possibles+=("${com:t}")
+# done
 # add all the builtins, cd, source,...
-for cmd in ${(k)builtins}; do 
-  __possibles+=$cmd
-done 
+# for cmd in ${(k)builtins}; do 
+#   __possibles+=$cmd
+# done 
 # loop through all the aliases and add them to the array
-for alias in ${(k)aliases}; do
-  __possibles+=("$alias")
-done 
+# for alias in ${(k)aliases}; do
+#   __possibles+=$alias
+# done 
 # loop through all the functions and add them to the array
-for func in ${(k)functions}; do
-  __possibles+=("$func")
-done 
+# for func in ${(k)functions}; do
+#   __possibles+=$func
+# done
