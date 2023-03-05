@@ -118,11 +118,7 @@ function __select_next(){
   fi
 
   __selected_index=$((((((__selected_index)) % ${#__matches})) + 1))
-  __get_cur_pos
-  __print_matches
-  tput cup $__fut_row $__fut_col # add the to_replace - current_input
-  LBUFFER=$__matches[$__selected_index]
-  # future column plus new-prev
+  __print_selection
 }
 
 function __select_previous(){
@@ -140,10 +136,15 @@ function __select_previous(){
   fi
 
   
+  __print_selection
+}
+
+function __print_selection(){
   __get_cur_pos
   __print_matches
   tput cup $__fut_row $__fut_col # add the to_replace - current_input
-  LBUFFER=$__matches[$__selected_index] 
+  LBUFFER=$__matches[$__selected_index]
+  RBUFFER=""
 }
 
 function reset_selected_index(){
