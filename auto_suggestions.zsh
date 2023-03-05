@@ -118,6 +118,7 @@ function __select_next(){
   fi
 
   __selected_index=$((((((__selected_index)) % ${#__matches})) + 1))
+
   __print_selection
 }
 
@@ -133,8 +134,7 @@ function __select_previous(){
   ((__selected_index--))
   if [[ $__selected_index -eq -1 || $__selected_index -eq 0 ]]; then
     __selected_index=${#__matches}
-  fi
-
+  fi 
   
   __print_selection
 }
