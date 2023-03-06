@@ -21,6 +21,7 @@ https://user-images.githubusercontent.com/40186632/221368741-5c9897eb-148b-4e5c-
 
 
 **ToDo:**
+* [ ] Implement inline expansion for the first suggestion
 * [ ] Implement path expansions for editors, cd, ...
 * [x] Implement selections, ctrl+n: next, ctrl+p: prev
 * [x] Read .zsh_history
