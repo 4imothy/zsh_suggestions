@@ -45,7 +45,7 @@ function __match_input(){
   len="${#BUFFER}"
   first=$__matches[1]
   first=${__matches[1]:$len} 
-  echo -n "$__INLINE_PRINTING_FG$first"
+  echo -en "$__INLINE_PRINTING_FG$first$__DEFAULT_FG"
   tput cup $__fut_row $__fut_col
   unset len
   unset first
