@@ -5,7 +5,10 @@ __SELECTED_FG="\033[30m"
 __SELECTED_BG="\033[46m"
 __MATCHED_FG="\033[30m"
 __INLINE_PRINTING_FG="\033[96m"
+__INLINE_PRINTING_BG="\033[46m"
 __DEFAULT_FG="\033[34m" # change this to the color you want your typed text to be
+
+__insert=true
  
 function __set_fut_pos(){ 
   space=$(($(tput lines) - __fut_row))
@@ -18,11 +21,18 @@ function __set_fut_pos(){
  
 function __keypress() {
   zle .$WIDGET
+  __insert=true
+  __fut_row=0
+  __fut_col=0
   __match_input
 }
 
 function __delete() {
-  zle backward-delete-char # remove the last character
+  # remove the last character from buffer
+  BUFFER=${BUFFER%?}
+  __insert=false
+  __fut_row=0
+  __fut_col=0
   __match_input
 }
 
@@ -32,20 +42,31 @@ function __match_input(){
   __matches=()
   __get_cur_pos
   if [[ ${#__current_input} -eq 0 ]]; then
+    echo -n "\033[K" # remove the previous completion
     __clear_if_no_input
     tput cup $__fut_row $__fut_col
     return
   fi 
   __match_possibles
   __set_fut_pos
-  __print_matches
-  tput cup $__fut_row $((__fut_col + 1))
-  # remove the characters that are in matched and buffer
-  # remove the first ${#BUFFER} characters from __matches[1]
-  len="${#BUFFER}"
-  first=$__matches[1]
-  first=${__matches[1]:$len} 
-  echo -en "$__INLINE_PRINTING_FG$first$__DEFAULT_FG"
+  # __print_matches
+  # remove the first ${#BUFFER} characters from __matches[1] 
+  len="${#__current_input}"
+  first=${__matches[1]:$len}
+  if [ "$__insert" = true ] ; then
+    tput cup $__fut_row $((__fut_col + 1)) # new character was added
+    echo "$__INLINE_PRINTING_FG$__INLINE_PRINTING_BG$first\033[49m$__DEFAULT_FG\033[K" # [K to remove the previous completion
+  else
+    tput cup $__fut_row $((__fut_col))
+    # echo "hello\033[K" # [K to remove the previous completion
+    # echo -n "$(tput cup $__fut_row $(( __fut_col - 1 )))$first" 
+    print -z -- "Hello, world!" 
+  fi
+
+  # it delets the first charactre from $first, prints in the right spot
+  echo "\n\n\n\n\n$first\033[K"
+  echo "$BUFFER\ent\033[K"
+  echo "$len"
   tput cup $__fut_row $__fut_col
   unset len
   unset first
@@ -110,7 +131,6 @@ function __print_matches(){
     ((remaining--))
   done
   unset remaining
-  echo -n "$__DEFAULT_FG"
 }
 
 function __get_cur_pos(){
@@ -154,7 +174,6 @@ function __print_selection(){
   __print_matches
   tput cup $__fut_row $__fut_col # add the to_replace - current_input
   LBUFFER=$__matches[$__selected_index]
-  RBUFFER=""
 }
 
 function reset_selected_index(){
