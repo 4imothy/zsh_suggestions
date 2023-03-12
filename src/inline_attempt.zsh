@@ -54,13 +54,13 @@ function __match_input(){
   len="${#__current_input}"
   first=${__matches[1]:$len}
   if [ "$__insert" = true ] ; then
-    tput cup $__fut_row $((__fut_col + 1)) # new character was added
+    tput cuf1
     echo "$__INLINE_PRINTING_FG$__INLINE_PRINTING_BG$first\033[49m$__DEFAULT_FG\033[K" # [K to remove the previous completion
   else
-    tput cup $__fut_row $((__fut_col))
+    tput cub1
     # echo "hello\033[K" # [K to remove the previous completion
     # echo -n "$(tput cup $__fut_row $(( __fut_col - 1 )))$first" 
-    print -z -- "Hello, world!" 
+    echo "hello\033[K"
   fi
 
   # it delets the first charactre from $first, prints in the right spot
@@ -197,10 +197,10 @@ __matches=()
 typeset -U __matches # make it a set
 
 zle -N self-insert __keypress 
-zle -N __remove_in_copy __delete # change the action of delete key to deleting most recent and updating __current_input
+zle -N __del __delete # change the action of delete key to deleting most recent and updating __current_input
 zle -N __next __select_next
 zle -N __prev __select_previous
-bindkey "^?" __remove_in_copy
+bindkey "^?" __del
 bindkey "^P" __prev
 bindkey "^N" __next
 
