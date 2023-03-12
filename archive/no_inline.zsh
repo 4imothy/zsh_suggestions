@@ -4,10 +4,7 @@ __MAX_LENGTH=5 # change this to allow for more/less suggestions
 __SELECTED_FG="\033[30m"
 __SELECTED_BG="\033[46m"
 __MATCHED_FG="\033[30m"
-__INLINE_PRINTING_FG=8
-__DEFAULT_FG=4 # change this to the color you want your typed text to be
-
-__insert=true
+__DEFAULT_FG="\033[34m" # change this to the color you want your typed text to be
  
 function __set_fut_pos(){ 
   space=$(($(tput lines) - __fut_row))
@@ -19,27 +16,21 @@ function __set_fut_pos(){
 }
  
 function __keypress() {
-  POSTDISPLAY=""
   zle .$WIDGET
   __match_input
-  __apply_highlighting
 }
 
 function __delete() {
-  # remove the last character from buffer
-  POSTDISPLAY=""
-  BUFFER=${BUFFER%?}
+  zle backward-delete-char # remove the last character
   __match_input
-  __apply_highlighting
 }
 
 function __match_input(){
   __current_input="${BUFFER}"
   __prev_length="${#__matches}"
   __matches=()
-  __get_cur_pos
+    __get_cur_pos
   if [[ ${#__current_input} -eq 0 ]]; then
-    echo -n "\033[K" # remove the previous completion
     __clear_if_no_input
     tput cup $__fut_row $__fut_col
     return
@@ -47,11 +38,7 @@ function __match_input(){
   __match_possibles
   __set_fut_pos
   __print_matches
-  # remove the first ${#BUFFER} characters from __matches[1] 
-  local len="${#__current_input}"
-  local first=${__matches[1]:$len}
   tput cup $__fut_row $__fut_col
-  POSTDISPLAY=$first
 }
 
 function __clear_if_no_input(){
@@ -62,14 +49,7 @@ function __clear_if_no_input(){
     done
 }
 
-function __apply_highlighting() {
-  region_highlight=()
-  region_highlight=("P0 $#BUFFER fg=$__DEFAULT_FG")
-	if [ $#POSTDISPLAY -gt 0 ]; then
-    region_highlight+=("$#BUFFER $(($#BUFFER + $#POSTDISPLAY)) fg=$__INLINE_PRINTING_FG")
-  fi
-}      
-
+      
 function __match_possibles(){
   # if there are no typed words, then clear the output and return
   for ex in "${__possibles[@]}"; do
@@ -113,12 +93,14 @@ function __print_matches(){
     fi
   done 
   # if the matches have less then the previous number in matches then print out blank lines
-  local remaining=$((__prev_length - i)) 
+  remaining=$((__prev_length - i)) 
   while [ $remaining -ge 0 ] 
   do
     echo -n "\n\033[K"
     ((remaining--))
   done
+  unset remaining
+  echo -n "$__DEFAULT_FG"
 }
 
 function __get_cur_pos(){
@@ -131,24 +113,24 @@ function __get_cur_pos(){
 }
 
 function __select_next(){
-  # POSTDISPLAY=""
-  POSTDISPLAY=""
-
   if [[ ${#__matches} -eq 0 ]]; then
     return
   fi
 
-  __selected_index=$(($__selected_index % ${#__matches} + 1))
+  __selected_index=$((((((__selected_index)) % ${#__matches})) + 1))
 
   __print_selection
 }
 
-function __select_previous(){ 
-  POSTDISPLAY=""
+function __select_previous(){
   if [[ ${#__matches} -eq 0 ]]; then
     return
   fi
 
+  # 0 -> len 
+  # len -> len - 1
+  # len - 1 -> len - 2
+  # __selected_index=${$(($((((__selected_index % ${#__matches})) - 1))))#-}
   ((__selected_index--))
   if [[ $__selected_index -eq -1 || $__selected_index -eq 0 ]]; then
     __selected_index=${#__matches}
@@ -162,7 +144,7 @@ function __print_selection(){
   __print_matches
   tput cup $__fut_row $__fut_col # add the to_replace - current_input
   LBUFFER=$__matches[$__selected_index]
-  __apply_highlighting
+  RBUFFER=""
 }
 
 function reset_selected_index(){
@@ -171,7 +153,8 @@ function reset_selected_index(){
 
 if [[ ! "$precmd_functions" == *reset_selected_index* ]]; then
     precmd_functions+=(reset_selected_index)
-fi   
+fi
+
 
 __selected_index=0
 __current_input=""
@@ -185,9 +168,10 @@ __matches=()
 typeset -U __matches # make it a set
 
 zle -N self-insert __keypress 
-zle -N backward-delete-char __delete
+zle -N __remove_in_copy __delete # change the action of delete key to deleting most recent and updating __current_input
 zle -N __next __select_next
 zle -N __prev __select_previous
+bindkey "^?" __remove_in_copy
 bindkey "^P" __prev
 bindkey "^N" __next
 
@@ -198,3 +182,20 @@ __possibles+=("${(k)aliases[@]}")
 __possibles+=("${(k)functions[@]}")
 
 typeset -U __possibles
+# remove duplicates # loop through $commands
+# for com in $commands; do
+#   # take the last in the path, the name
+#   __possibles+=("${com:t}")
+# done
+# add all the builtins, cd, source,...
+# for cmd in ${(k)builtins}; do 
+#   __possibles+=$cmd
+# done 
+# loop through all the aliases and add them to the array
+# for alias in ${(k)aliases}; do
+#   __possibles+=$alias
+# done 
+# loop through all the functions and add them to the array
+# for func in ${(k)functions}; do
+#   __possibles+=$func
+# done
