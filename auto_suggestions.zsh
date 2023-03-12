@@ -31,7 +31,7 @@ function __keypress() {
 function __delete() {
   # remove the last character from buffer
   POSTDISPLAY=""
-  BUFFER=${BUFFER%?}
+  zle backward-delete-char
   __match_input
   __apply_highlighting
 }
@@ -188,9 +188,10 @@ __matches=()
 typeset -U __matches # make it a set
 
 zle -N self-insert __keypress 
-zle -N backward-delete-char __delete
+zle -N __remove __delete
 zle -N __next __select_next
 zle -N __prev __select_previous
+bindkey "^?" __remove
 bindkey "^P" __prev
 bindkey "^N" __next
 
