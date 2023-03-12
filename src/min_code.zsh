@@ -4,17 +4,23 @@ function __keypress() {
   zle .$WIDGET
   __get_cur_pos
   tput cuf1
-  echo -n "works\033[K" 
+  RBUFFER=""
+  RBUFFER="work"
   tput cup $__fut_row $__fut_col
 }
 
 function __delete() {
   # remove the last character from buffer
+  # echo -n "fail\033[K"
   __get_cur_pos
-  tput cub1
-  echo -n "fail\033[K"
-  tput cup $__fut_row $__fut_col
+  RBUFFER=""
   BUFFER=${BUFFER%?}
+  RBUFFER="fuck"
+  tput cup $__fut_row $__fut_col
+}
+
+function __clear_rbuffer(){
+  RBUFFER=""
 }
 
 function __get_cur_pos(){
@@ -26,6 +32,13 @@ function __get_cur_pos(){
   unset line
 }
 
+function clear-rbuffer-and-execute {
+  RBUFFER=""
+  zle accept-line
+}
+
+zle -N clear-rbuffer-and-execute
+bindkey '^M' clear-rbuffer-and-execute 
 zle -N self-insert __keypress 
 zle -N __del __delete # change the action of delete key to deleting most recent and updating __current_input
 bindkey "^?" __del

@@ -182,8 +182,7 @@ function reset_selected_index(){
 
 if [[ ! "$precmd_functions" == *reset_selected_index* ]]; then
     precmd_functions+=(reset_selected_index)
-fi
-
+fi   
 
 __selected_index=0
 __current_input=""
