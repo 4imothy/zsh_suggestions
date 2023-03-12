@@ -76,7 +76,8 @@ function __apply_highlighting() {
 function __match_possibles(){
   # if there are no typed words, then clear the output and return
   for ex in "${__possibles[@]}"; do
-    if [[ "$ex" == "$__current_input"* ]]; then
+    # if it matches the current input and is longer, to not print what is currently typed
+    if [[ "$ex" == "$__current_input"* && ${#ex} -gt ${#__current_input} ]]; then 
       if [[ "${#__matches}" -lt __MAX_LENGTH ]]; then # if the length of matches is less than 5 add
         __matches+=$ex
       else
