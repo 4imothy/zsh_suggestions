@@ -24,6 +24,7 @@ https://user-images.githubusercontent.com/40186632/221368741-5c9897eb-148b-4e5c-
 
 
 #### ToDo:
+* [ ] clean up syntax, get rid of unnecessary [\[\]] and ${#} stuff
 * [ ] Implement path expansions for editors, cd, ...
 * [x] Implement inline expansion for the first suggestion
 * [x] Implement selections, ctrl+n: next, ctrl+p: prev
