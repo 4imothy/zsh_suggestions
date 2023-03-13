@@ -4,7 +4,7 @@
 # if __MAX_LENGTH is 1 suggestions will only be printed
 # suggestions after the first will be printed below
 __MAX_LENGTH=6
-__INLINE_PRINTING_FG=8 # this is the color of the inline completions
+__INLINE_PRINTING_FG=7 # this is the color of the inline completions
 __DEFAULT_FG=4 # change this to the color you want your typed text to be
 __SELECTED_FG="\033[30m"
 __SELECTED_BG="\033[46m"
@@ -13,12 +13,13 @@ __MATCHED_FG="\033[30m"
 __insert=true
  
 function __set_fut_pos(){ 
-  space=$(($(tput lines) - __fut_row))
-  if [[ ${#__matches[@]} -ge $space ]]; then # if length is greater than space
-    ((__fut_row-=$((${#__matches} - space ))))  # move up length - space
+  local space=$(($(tput lines) - __fut_row))
+  local num_printed=$(($#__matches - 1))
+
+  if [[ num_printed -ge $space ]]; then # if length is greater than space
+    ((__fut_row-=$(( num_printed - space ))))  # move up length - space
     ((__fut_row--))
   fi
-  unset space
 }
  
 function __keypress() {
@@ -42,7 +43,6 @@ function __match_input(){
   __matches=()
   __get_cur_pos
   if [[ ${#__current_input} -eq 0 ]]; then
-    echo -n "\033[K" # remove the previous completion
     __clear_if_no_input
     tput cup $__fut_row $__fut_col
     return
@@ -58,7 +58,8 @@ function __match_input(){
 }
 
 function __clear_if_no_input(){
-  while [ $__prev_length -ge 1 ] 
+  # this is two because the first is the inline
+  while [ $__prev_length -ge 2 ] 
     do
       echo -n "\n\033[K"
       ((__prev_length--))
