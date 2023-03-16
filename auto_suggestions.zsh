@@ -38,11 +38,13 @@ function __delete() {
 }
 
 function __match_input(){
-  __current_input="${BUFFER}"
-  __prev_length="${#__matches}"
+
+  reset_selected_index # clear out the previous selection
+  __current_input=$BUFFER
+  __prev_length=$#__matches
   __matches=()
   __get_cur_pos
-  if [[ ${#__current_input} -eq 0 ]]; then
+  if [ $#__current_input -eq 0 ]; then
     __clear_if_no_input
     tput cup $__fut_row $__fut_col
     return
@@ -51,8 +53,7 @@ function __match_input(){
   __set_fut_pos
   __print_matches
   # remove the first ${#BUFFER} characters from __matches[1] 
-  local len="${#__current_input}"
-  local first=${__matches[1]:$len}
+  local first=${__matches[1]:$#__current_input}
   tput cup $__fut_row $__fut_col
   POSTDISPLAY=$first
 }
@@ -79,7 +80,7 @@ function __match_possibles(){
   for ex in "${__possibles[@]}"; do
     # if it matches the current input and is longer, to not print what is currently typed
     if [[ "$ex" == "$__current_input"* && ${#ex} -gt ${#__current_input} ]]; then 
-      if [[ "${#__matches}" -lt __MAX_LENGTH ]]; then # if the length of matches is less than 5 add
+      if [ $#__matches -lt $__MAX_LENGTH ]; then # if the length of matches is less than 5 add
         __matches+=$ex
       else
         # Find the longest string in the array
@@ -88,12 +89,12 @@ function __match_possibles(){
         long_ind=0
         for string in "${__matches[@]}"; do
           index=$((index+1))
-          if [[ "${#string}" -gt "${#longest_string}" ]]; then
+          if [ $#string -gt $#longest_string ]; then
             longest_string="$string"
             long_ind=($index)
           fi
         done
-        if [[ "${#ex}" -lt "${#longest_string}" ]]; then
+        if [ $#ex -lt $#longest_string ]; then
               __matches[$long_ind]=$ex # replace the longest string 
         fi
       fi
@@ -111,7 +112,7 @@ function __match_possibles(){
   
 function __print_matches(){
   for ((i=2; i<=${#__matches[@]}; i+=1)); do 
-    if [[ $i == $__selected_index ]]; then
+    if [ $i -eq $__selected_index ]; then
       echo -n "\n$__SELECTED_BG$__SELECTED_FG$__matches[$i]\033[39m\033[49m\033[K" # print out the selected match with colored background
     else
       echo -n "$__MATCHED_FG\n$__matches[$i]\033[K" # print out matches
@@ -139,7 +140,7 @@ function __select_next(){
   # POSTDISPLAY=""
   POSTDISPLAY=""
 
-  if [[ ${#__matches} -eq 0 ]]; then
+  if [ $#__matches -eq 0 ]; then
     return
   fi
 
@@ -150,7 +151,7 @@ function __select_next(){
 
 function __select_previous(){ 
   POSTDISPLAY=""
-  if [[ ${#__matches} -eq 0 ]]; then
+  if [ $#__matches -eq 0 ]; then
     return
   fi
 
