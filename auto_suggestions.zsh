@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+# AUTHOR: Timothy Cronin
+
 # change this to allow for more/less suggestions
 # if __MAX_LENGTH is 1 suggestions will only be printed
 # suggestions after the first will be printed below
