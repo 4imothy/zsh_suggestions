@@ -183,9 +183,7 @@ __selected_index=0
 __current_input=""
 __fut_row=""
 __fut_col=""
-# __idx_selected=0
 zmodload zsh/mapfile
-#__hist=("${(f@)mapfile[test.txt]}") 
 __possibles=("${(f@)mapfile[$HISTFILE]}") 
 __matches=()
 typeset -U __matches # make it a set
@@ -202,6 +200,5 @@ bindkey "^N" __next
 __possibles+=("${(k)commands[@]}")
 __possibles+=("${(k)builtins[@]}")
 __possibles+=("${(k)aliases[@]}")
-__possibles+=("${(k)functions[@]}")
-
+__possibles+=("${(k)functions[@]}") 
 typeset -U __possibles
