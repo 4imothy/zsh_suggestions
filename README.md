@@ -24,8 +24,6 @@ https://user-images.githubusercontent.com/40186632/221368741-5c9897eb-148b-4e5c-
 
 
 #### ToDo:
-* [ ] When selected_index is 0 reprint the POSTDISPLAY, as selecting other
-completions removes the POSTDISPLAY
 * [ ] Implement path expansions for editors, cd, ...
 * [x] clean up syntax, get rid of unnecessary [\[\]] and ${#} stuff
 * [x] Implement inline expansion for the first suggestion
