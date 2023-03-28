@@ -8,9 +8,13 @@
 __MAX_LENGTH=6
 __INLINE_PRINTING_FG=7 # this is the color of the inline completions
 __DEFAULT_FG=4 # change this to the color you want your typed text to be
-__SELECTED_FG="\033[30m"
 # __SELECTED_BG="\033[46m" # uncomment this to give the selected a background
-__MATCHED_FG="\033[37m"
+# # Recomended for a light background
+# __SELECTED_FG="\033[30m"
+# __MATCHED_FG="\033[37m"
+# Recomended for a dark background
+__SELECTED_FG="\033[37m"
+__MATCHED_FG="\033[90m"
 
 __insert=true
  
